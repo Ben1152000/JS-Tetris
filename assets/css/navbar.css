@@ -1,0 +1,7 @@
+
+.btn-separator:after {
+  content: ' ';
+  display: block;
+  height: 100%;
+  width: 3px;
+}

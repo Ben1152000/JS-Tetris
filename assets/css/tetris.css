@@ -1,0 +1,46 @@
+
+.tetris {
+  margin: auto auto;
+  display: flex;
+  height: calc((100% - 56px) * 0.9);
+  background-color: cornflowerblue;
+}
+
+.tetris-right {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: white;
+}
+
+.grid {
+  display: inline-grid;
+  --grid-scale: 1;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+  border-bottom: 2px solid black;
+  border-right: 2px solid black;
+  vertical-align: top;
+}
+
+.grid > .tile {
+  background-color: aliceblue;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+}
+
+.grid > .tile-active {
+  background-color: red;
+  box-shadow: inset -1px -1px 0px 1px  rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+.grid > .tile-inactive {
+  background-color: lightseagreen;
+  box-shadow: inset -1px -1px 0px 1px  rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+.tetris-next {
+  width: fit-content;
+  width: -moz-fit-content;
+  margin: auto;
+}

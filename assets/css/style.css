@@ -1,0 +1,21 @@
+@import "/node_modules/bootstrap/dist/css/bootstrap.min.css"; 
+@import "navbar.css";
+@import "tetris.css";
+
+body {
+  background-image: url('/assets/images/space.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-position: center;
+  overscroll-behavior-y: none
+}
+
+.container {
+  max-width: 768px;
+  width: 100vw;
+  height: calc( 100vh - 56px );
+  /*background-color: #204080;*/
+  display: flex;
+}
+
