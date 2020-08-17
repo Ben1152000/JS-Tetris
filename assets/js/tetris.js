@@ -1,8 +1,9 @@
 
 class Tile {
 
-  constructor() {
+  constructor(color) {
     this.state = 0;
+    this.color = color; // 0 to 359
   }
   
   log() { return "" + this.state; }
@@ -29,18 +30,18 @@ const PIECES = [
   [true, [[1, 2], [0, 2], [0, 3], [1, 1]]], // S piece
 ]
 
-function generateEmptyGrid(rows, columns) {
-  let grid = []
-  for (let row = 0; row < rows; row++) {
-    grid.push([]);
-    for (let column = 0; column < columns; column++) {
-      grid[row].push(null);
-    }
-  }
-  return grid;
-}
-
 export class Tetris {
+
+  static generateEmptyGrid(rows, columns) {
+    let grid = []
+    for (let row = 0; row < rows; row++) {
+      grid.push([]);
+      for (let column = 0; column < columns; column++) {
+        grid[row].push(null);
+      }
+    }
+    return grid;
+  }
 
   constructor(rows, columns, callback) {
 
@@ -48,11 +49,15 @@ export class Tetris {
     this.columns = columns;
     this.callback = callback;
 
-    this.grid = generateEmptyGrid(this.rows, this.columns);
+    this.grid = Tetris.generateEmptyGrid(this.rows, this.columns);
 
     this.numTicks = 0;
     this.numPieces = 0;
+    this.numLines = 0;
     this.score = 0;
+    this.level = 0;
+
+    this.BASECOLOR = Math.floor(Math.random() * 360);
 
     this.pivot = null;
     this.nextPiece = this.randomPiece();
@@ -88,7 +93,7 @@ export class Tetris {
     }
 
     // Shift active tiles downwards:
-    let clone = generateEmptyGrid(this.rows, this.columns);
+    let clone = Tetris.generateEmptyGrid(this.rows, this.columns);
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.columns; j++) {
         if (this.grid[i][j] !== null && this.grid[i][j].isActive()) {
@@ -131,12 +136,13 @@ export class Tetris {
       }
     }
 
-    this.score += Math.round(numClears * (-40)
-    + Math.pow(numClears, 2) * (455/3)
-    + Math.pow(numClears, 3) * (-90)
-    + Math.pow(numClears, 4) * (55/3));
-
     this.numTicks++;
+    this.numLines += numClears;
+    this.score += Math.round(numClears * (-40)
+        + Math.pow(numClears, 2) * (455/3)
+        + Math.pow(numClears, 3) * (-90)
+        + Math.pow(numClears, 4) * (55/3));
+    this.level = Math.floor(this.numLines / 10);
 
     // Add new piece if necessary:
     if (onBottom) {
@@ -151,6 +157,10 @@ export class Tetris {
 
   randomPiece() {
     return Math.floor(Math.random() * 6);
+  }
+
+  pieceColor(numPieces) {
+    return ((numPieces * 133) + this.BASECOLOR) % 360;
   }
 
   addPiece() {
@@ -170,7 +180,9 @@ export class Tetris {
       if (this.grid[location[0]][location[1] + offset] !== null && this.grid[location[0]][location[1] + offset].isInactive()) {
         lost = true;
       }
-      this.grid[location[0]][location[1] + offset] = new Tile()
+      this.grid[location[0]][location[1] + offset] = new Tile(
+        this.pieceColor(this.numPieces)
+      );
       this.grid[location[0]][location[1] + offset].activate();
       
       if (pivot && parseInt(index) === 0) {
@@ -206,7 +218,7 @@ export class Tetris {
       }
 
       if (!error) {
-        let clone = generateEmptyGrid(this.rows, this.columns);
+        let clone = Tetris.generateEmptyGrid(this.rows, this.columns);
         for (let i = 0; i < this.rows; i++) {
           for (let j = 0; j < this.columns; j++) {
             if (this.grid[i][j] !== null && this.grid[i][j].isActive())
@@ -237,7 +249,7 @@ export class Tetris {
     }
 
     if (!onLeft) {
-      let clone = generateEmptyGrid(this.rows, this.columns);
+      let clone = Tetris.generateEmptyGrid(this.rows, this.columns);
       for (let i = 0; i < this.rows; i++) {
         for (let j = 0; j < this.columns; j++) {
           if (this.grid[i][j] !== null && this.grid[i][j].isActive()) {
@@ -272,7 +284,7 @@ export class Tetris {
     }
 
     if (!onRight) {
-      let clone = generateEmptyGrid(this.rows, this.columns);
+      let clone = Tetris.generateEmptyGrid(this.rows, this.columns);
       for (let i = 0; i < this.rows; i++) {
         for (let j = 0; j < this.columns; j++) {
           if (this.grid[i][j] !== null && this.grid[i][j].isActive()) {
@@ -329,9 +341,11 @@ export class Tetris {
         let tile = $('<div class="tile"></div>');
         if (this.grid[i][j] !== null && this.grid[i][j].isActive()) {
           tile.addClass("tile-active");
+          tile.css({'background-color': 'hsl(' + this.grid[i][j].color + ', 60%, 50%)'});
         }
         if (this.grid[i][j] !== null && this.grid[i][j].isInactive()) {
           tile.addClass("tile-inactive");
+          tile.css({'background-color': 'hsl(' + this.grid[i][j].color + ', 60%, 50%)'});
         }
         grid.append(tile);
       }
@@ -339,6 +353,7 @@ export class Tetris {
     container.append(grid);
 
     $('#scoreboard-score').text(this.score);
+    $('#scoreboard-level').text(this.level);
     $('#scoreboard-piece').text(this.nextPiece);
 
     this.renderNextPiece();
@@ -368,6 +383,7 @@ export class Tetris {
           let location = PIECES[this.nextPiece][1][index];
           if (i === location[0] + 1 && j === location[1]) {
             tile.addClass("tile-active");
+            tile.css({'background-color': 'hsl(' + this.pieceColor(this.numPieces) + ', 60%, 50%)'});
           }
         }
         grid.append(tile);
@@ -376,5 +392,9 @@ export class Tetris {
 
     container.append(grid);
 
+  }
+
+  tickDuration() {
+    return Math.max(1, Math.floor(500 * Math.exp(-this.level / 20)));
   }
 }

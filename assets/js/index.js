@@ -1,29 +1,5 @@
 import { Tetris } from '/assets/js/tetris.js';
 
-/*
-export class Game {
-
-  constructor() {
-    this.tetris = new Tetris(20, 10);
-    requestAnimationFrame(() => { this.mainLoop });
-  }
-
-  mainLoop() {
-    this.update();
-    this.draw();
-    requestAnimationFrame(() => { this.mainLoop });
-  }
-
-  update() {
-    this.tetris.update();
-  }
-  
-  draw() {
-    this.tetris.log();
-  }
-
-}
-*/
 export function main() {
 
   let keysdown = {};
@@ -34,6 +10,7 @@ export function main() {
         case 32:
           if (keysdown[key] === 0) {
             tetris.drop(() => { tetris.render(); });
+            timeSinceLastUpdate = 0;
           }
           break;
         case 37:
@@ -68,7 +45,7 @@ export function main() {
   }
 
   let tetris = new Tetris(20, 10);
-  tetris.update(() => { tetris.render(); });
+  tetris.render();
 
   let lastTimestamp = 0;
   let timeSinceLastUpdate = 0; // The last time the loop was run
@@ -78,7 +55,7 @@ export function main() {
     let delta = timestamp - lastTimestamp;
 
     handleInput(delta);
-    if (timeSinceLastUpdate > 500) {
+    if (timeSinceLastUpdate > tetris.tickDuration()) {
       tetris.update(() => { tetris.render(); });
       timeSinceLastUpdate = 0;
     } else {
@@ -90,7 +67,6 @@ export function main() {
   }
 
   $(document).keydown((event) => {
-    console.log('Key Down:', event.which);
     if (!(event.which in keysdown))
       keysdown[event.which] = 0;
   });
@@ -101,6 +77,13 @@ export function main() {
 
   $(window).resize(() => {
     tetris.render();
+  });
+
+  $('#button-tetris-reset').on('click', (event) => {
+    event.preventDefault();
+    tetris = new Tetris(20, 10);
+    tetris.render();
+    timeSinceLastUpdate = 0;
   });
 
   requestAnimationFrame(mainLoop);
