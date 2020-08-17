@@ -73,7 +73,7 @@ export class Tetris {
 
   }
 
-  update() {
+  update(callback) {
 
     // Check if new tile needs to be generated:
     let onBottom = false;
@@ -142,6 +142,8 @@ export class Tetris {
     if (onBottom) {
       this.addPiece();
     }
+
+    callback();
 
   }
 
@@ -294,7 +296,7 @@ export class Tetris {
   drop(callback) {
     let current = this.numPieces;
     while (current === this.numPieces)
-      this.update();
+      this.update(() => {});
     callback();
   }
 
